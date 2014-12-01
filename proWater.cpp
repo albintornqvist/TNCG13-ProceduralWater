@@ -46,6 +46,7 @@
 #include <maya/MMatrix.h>
 
 #include <maya/MDagModifier.h>
+#include <simplexNoise.cpp>
 
 
 class proWater : public MPxDeformerNode
@@ -153,14 +154,16 @@ proWater::deform( MDataBlock& block,
 	// iterate through each point in the geometry
 	//
 	for ( ; !iter.isDone(); iter.next()) {
-		MPoint pt = iter.position();
+        MPoint pt = iter.position();
 		pt *= omatinv;
-		
-		float weight = weightValue(block,multiIndex,iter.index());
+        
+		//float weight = weightValue(block,multiIndex,iter.index());
 		
 		// offset algorithm
 		//
-		pt.y = pt.y + env*weight;
+        iter.normal();
+        iter.position();
+		pt.y = pt.y + scaled_raw_noise_2d(-0.5, 0.5, env*(float)pt.x/2, env*(float)pt.z)/2;
 		//
 		// end of offset algorithm
 

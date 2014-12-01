@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>D4191651-A4DB-46A1-BB41-AC19BD3B50EE</string>
+	<key>IDESourceControlProjectName</key>
+	<string>proWater</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</key>
+		<string>https://github.com/albintornqvist/TNCG13-ProceduralWater.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>proWater.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/albintornqvist/TNCG13-ProceduralWater.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</string>
+			<key>IDESourceControlWCCName</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>TNCG13-ProceduralWater</string>
+		</dict>
+	</array>
+</dict>
+</plist>
