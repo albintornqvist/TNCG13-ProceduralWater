@@ -22,6 +22,7 @@
 #include <string.h>
 #include <maya/MIOStream.h>
 #include <math.h>
+#include <cmath>
 
 #include <maya/MPxDeformerNode.h> 
 #include <maya/MItGeometry.h>
@@ -79,6 +80,12 @@ public:
 	static  MObject     offsetMatrix; 	// offset center and axis
 	
 	static  MTypeId		id;
+    
+    static MObject time; //time variable
+    static MObject amplitude1;
+    static MObject amplitude2;
+    static MObject amplitude3;
+    static MObject frequency1;
 
 private:
 };
@@ -88,6 +95,12 @@ MTypeId     proWater::id( 0x8000c );
 // local attributes
 //
 MObject		proWater::offsetMatrix;
+
+MObject proWater::time;
+MObject proWater::amplitude1;
+MObject proWater::amplitude2;
+MObject proWater::amplitude3;
+MObject proWater::frequency1;
 
 
 proWater::proWater() {}
@@ -101,7 +114,45 @@ void* proWater::creator()
 MStatus proWater::initialize()
 {
 	// local attribute initialization
-
+    //time parameter
+    MFnNumericAttribute nAttr;
+    time = nAttr.create("time", "t", MFnNumericData::kDouble);
+    nAttr.setDefault(0.0);
+    nAttr.setKeyable(true);
+    nAttr.setSoftMin(0.0);
+    nAttr.setSoftMax(10);
+    nAttr.setMin(0.0);
+    nAttr.setMax(10);
+    addAttribute(time);
+    attributeAffects(proWater::time, proWater::outputGeom);
+    //
+    
+    //amplitude1 parameter
+    MFnNumericAttribute ampAttr1;
+    amplitude1 = ampAttr1.create("firstOctave", "amp1", MFnNumericData::kDouble);
+    ampAttr1.setDefault(0.0);
+    ampAttr1.setKeyable(true);
+    ampAttr1.setSoftMin(0.0);
+    ampAttr1.setSoftMax(10);
+    ampAttr1.setMin(0.0);
+    ampAttr1.setMax(10);
+    addAttribute(amplitude1);
+    attributeAffects(proWater::amplitude1, proWater::outputGeom);
+    //
+    
+    //frequency1 parameter
+    MFnNumericAttribute freqAttr1;
+    frequency1 = freqAttr1.create("firstFrequency", "freq1", MFnNumericData::kDouble);
+    freqAttr1.setDefault(0.0);
+    freqAttr1.setKeyable(true);
+    freqAttr1.setSoftMin(0.0);
+    freqAttr1.setSoftMax(100);
+    freqAttr1.setMin(0.0);
+    freqAttr1.setMax(100);
+    addAttribute(frequency1);
+    attributeAffects(proWater::frequency1, proWater::outputGeom);
+    //
+    
 	MFnMatrixAttribute  mAttr;
 	offsetMatrix=mAttr.create( "locateMatrix", "lm");
 	    mAttr.setStorable(false);
@@ -141,11 +192,25 @@ proWater::deform( MDataBlock& block,
 	//
 	MDataHandle envData = block.inputValue(envelope, &returnStatus);
 	if (MS::kSuccess != returnStatus) return returnStatus;
-	float env = envData.asFloat();	
+	float env = envData.asFloat();
+    
+    MDataHandle timeData = block.inputValue(time, &returnStatus);
+    if(MS::kSuccess != returnStatus) return returnStatus;
+    double t = timeData.asDouble();
+    
+    MDataHandle ampData = block.inputValue(amplitude1, &returnStatus);
+    if(MS::kSuccess != returnStatus) return returnStatus;
+    double amp1 = ampData.asDouble();
+    
+    MDataHandle freqData = block.inputValue(frequency1, &returnStatus);
+    if(MS::kSuccess != returnStatus) return returnStatus;
+    double freq1 = freqData.asDouble();
 
 	// Get the matrix which is used to define the direction and scale
 	// of the offset.
 	//
+    
+    
 	MDataHandle matData = block.inputValue(offsetMatrix, &returnStatus );
 	if (MS::kSuccess != returnStatus) return returnStatus;
 	MMatrix omat = matData.asMatrix();
@@ -161,9 +226,28 @@ proWater::deform( MDataBlock& block,
 		
 		// offset algorithm
 		//
-        iter.normal();
-        iter.position();
-		pt.y = pt.y + scaled_raw_noise_2d(-0.5, 0.5, env*(float)pt.x/2, env*(float)pt.z)/2;
+        
+        
+        
+        
+        //Displacement algorithm
+        
+        float frequency1 = freq1/10;//0.06;
+        float amplitude1 = amp1;//1.0;
+        
+        float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)pt.x*frequency1/1.5, (float)pt.z*frequency1, t))-amplitude1);
+        
+        float frequency2 = 0.2;
+        float amplitude2 = 0.6;
+        
+        float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)pt.x*frequency2/5, (float)pt.z*frequency2/2, t))-amplitude2);
+        
+        float frequency3 = 0.3;
+        float amplitude3 = 0.2;
+        
+        float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)pt.x*frequency3, (float)pt.z*frequency3, t))-amplitude3);
+        
+        pt.y = pt.y + firstOctave + secondOctave + thirdOctave;
 		//
 		// end of offset algorithm
 
