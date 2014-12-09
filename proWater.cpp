@@ -45,9 +45,11 @@
 #include <maya/MPoint.h>
 #include <maya/MVector.h>
 #include <maya/MMatrix.h>
+#include <maya/MFnMesh.h>
 
 #include <maya/MDagModifier.h>
 #include <simplexNoise.cpp>
+#include <complex>
 
 
 class proWater : public MPxDeformerNode
@@ -58,13 +60,9 @@ public:
 
 	static  void*		creator();
 	static  MStatus		initialize();
-
-	// deformation function
-	//
-    virtual MStatus      		deform(MDataBlock& 		block,
-									   MItGeometry& 	iter,
-									   const MMatrix& 	mat,
-									   unsigned int		multiIndex);
+    
+    
+    MStatus compute(const MPlug& plug, MDataBlock& dataBlock);
 
 	// when the accessory is deleted, this node will clean itself up
 	//
@@ -167,94 +165,101 @@ MStatus proWater::initialize()
 }
 
 
-MStatus
-proWater::deform( MDataBlock& block,
-				MItGeometry& iter,
-				const MMatrix& /*m*/,
-				unsigned int multiIndex)
-//
-// Method: deform
-//
-// Description:   Deform the point with a squash algorithm
-//
-// Arguments:
-//   block		: the datablock of the node
-//	 iter		: an iterator for the geometry to be deformed
-//   m    		: matrix to transform the point into world space
-//	 multiIndex : the index of the geometry that we are deforming
-//
-//
+MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
 {
-	MStatus returnStatus;
-	
-	// Envelope data from the base class.
-	// The envelope is simply a scale factor.
-	//
-	MDataHandle envData = block.inputValue(envelope, &returnStatus);
-	if (MS::kSuccess != returnStatus) return returnStatus;
-	float env = envData.asFloat();
+    MStatus status = MStatus::kUnknownParameter;
+    if (plug.attribute() == outputGeom) {
+        // get the input corresponding to this output
+        //
+        unsigned int index = plug.logicalIndex();
+        MObject thisNode = this->thisMObject();
+        MPlug inPlug(thisNode,input);
+        inPlug.selectAncestorLogicalIndex(index,input);
+        MDataHandle hInput = dataBlock.inputValue(inPlug);
+        
+        // get the input geometry and input groupId
+        //
+        MDataHandle hGeom = hInput.child(inputGeom);
+        MDataHandle hGroup = hInput.child(groupId);
+        
+        
+        
+        unsigned int groupId = hGroup.asLong();
+        MDataHandle hOutput = dataBlock.outputValue(plug);
+        hOutput.copy(hGeom);
+        
+        
+        MStatus returnStatus;
+        
+        MDataHandle envData = dataBlock.inputValue(envelope, &returnStatus);
+        if (MS::kSuccess != returnStatus) return returnStatus;
+        float env = envData.asFloat();
+        
+        MDataHandle timeData = dataBlock.inputValue(time, &returnStatus);
+        if(MS::kSuccess != returnStatus) return returnStatus;
+        double t = timeData.asDouble();
+        
+        MDataHandle ampData = dataBlock.inputValue(amplitude1, &returnStatus);
+        if(MS::kSuccess != returnStatus) return returnStatus;
+        double amp1 = ampData.asDouble();
+        
+        MDataHandle freqData = dataBlock.inputValue(frequency1, &returnStatus);
+        if(MS::kSuccess != returnStatus) return returnStatus;
+        double freq1 = freqData.asDouble();
+        
+        
+        // Get the MFnMesh
+        MStatus stat;
+        MObject inputObj = hOutput.data();
+        MFnMesh * meshFn = new MFnMesh(inputObj, &stat);
+        
+        // do the deformation
+        //
+        MItGeometry iter(hOutput,groupId,false);
+        
+        for ( ; !iter.isDone(); iter.next()) {
+            MPoint pt = iter.position();
+            
+            float2 uvPoint;
+            //float u,v;
+            
+            //uvPoint[0] = u;
+            //uvPoint[1] = v;
+            
+            meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
+            
+            float u = uvPoint[0]*100;
+            float v = uvPoint[1]*100;
+            
+            
+            float frequency1 = freq1/10;//0.06;
+            float amplitude1 = amp1;//1.0;
+            
+            float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)(u)*frequency1/1.5, (float)(v+t)*frequency1, 10))-amplitude1);
+            
+            float frequency2 = 0.2;
+            float amplitude2 = 0.6;
+            
+            float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)u*frequency2/5, (float)v*frequency2/2, 10))-amplitude2);
+            
+            float frequency3 = 0.3;
+            float amplitude3 = 0.2;
+            
+            float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)u*frequency3, (float)v*frequency3, 10))-amplitude3);
+            
+            float disp = firstOctave + secondOctave + thirdOctave;
+            
+            pt = pt + iter.normal()*disp;
+            
+            iter.setPosition(pt);
+        }
+        
+        delete meshFn;
+        status = MStatus::kSuccess;
+    }
     
-    MDataHandle timeData = block.inputValue(time, &returnStatus);
-    if(MS::kSuccess != returnStatus) return returnStatus;
-    double t = timeData.asDouble();
     
-    MDataHandle ampData = block.inputValue(amplitude1, &returnStatus);
-    if(MS::kSuccess != returnStatus) return returnStatus;
-    double amp1 = ampData.asDouble();
-    
-    MDataHandle freqData = block.inputValue(frequency1, &returnStatus);
-    if(MS::kSuccess != returnStatus) return returnStatus;
-    double freq1 = freqData.asDouble();
-
-	// Get the matrix which is used to define the direction and scale
-	// of the offset.
-	//
-    
-    
-	MDataHandle matData = block.inputValue(offsetMatrix, &returnStatus );
-	if (MS::kSuccess != returnStatus) return returnStatus;
-	MMatrix omat = matData.asMatrix();
-	MMatrix omatinv = omat.inverse();
-
-	// iterate through each point in the geometry
-	//
-	for ( ; !iter.isDone(); iter.next()) {
-        MPoint pt = iter.position();
-		pt *= omatinv;
-        
-		//float weight = weightValue(block,multiIndex,iter.index());
-		
-		// offset algorithm
-		//
-        
-        
-        
-        
-        //Displacement algorithm
-        
-        float frequency1 = freq1/10;//0.06;
-        float amplitude1 = amp1;//1.0;
-        
-        float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)pt.x*frequency1/1.5, (float)pt.z*frequency1, t))-amplitude1);
-        
-        float frequency2 = 0.2;
-        float amplitude2 = 0.6;
-        
-        float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)pt.x*frequency2/5, (float)pt.z*frequency2/2, t))-amplitude2);
-        
-        float frequency3 = 0.3;
-        float amplitude3 = 0.2;
-        
-        float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)pt.x*frequency3, (float)pt.z*frequency3, t))-amplitude3);
-        
-        pt.y = pt.y + firstOctave + secondOctave + thirdOctave;
-		//
-		// end of offset algorithm
-
-		pt *= omat;
-		iter.setPosition(pt);
-	}
-	return returnStatus;
+    return status;
 }
 
 
