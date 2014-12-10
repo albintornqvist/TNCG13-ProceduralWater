@@ -152,9 +152,9 @@ MStatus proWater::initialize()
     bigAttr.setDefault(3);
     bigAttr.setKeyable(true);
     bigAttr.setSoftMin(0.0);
-    bigAttr.setSoftMax(10);
+    bigAttr.setSoftMax(100);
     bigAttr.setMin(0.0);
-    bigAttr.setMax(10);
+    bigAttr.setMax(100);
     addAttribute(bigFreq);
     attributeAffects(proWater::bigFreq, proWater::outputGeom);
     //
@@ -162,12 +162,12 @@ MStatus proWater::initialize()
     //amplitude1 parameter
     MFnNumericAttribute ampAttr1;
     amplitude1 = ampAttr1.create("firstOctaveAmplitude", "amp1", MFnNumericData::kDouble);
-    ampAttr1.setDefault(0.6);
+    ampAttr1.setDefault(0.5);
     ampAttr1.setKeyable(true);
     ampAttr1.setSoftMin(0.0);
-    ampAttr1.setSoftMax(10);
+    ampAttr1.setSoftMax(100);
     ampAttr1.setMin(0.0);
-    ampAttr1.setMax(10);
+    ampAttr1.setMax(100);
     addAttribute(amplitude1);
     attributeAffects(proWater::amplitude1, proWater::outputGeom);
     //
@@ -175,7 +175,7 @@ MStatus proWater::initialize()
     //frequency1 parameter
     MFnNumericAttribute freqAttr1;
     frequency1 = freqAttr1.create("firstFrequency", "freq1", MFnNumericData::kDouble);
-    freqAttr1.setDefault(1.0);
+    freqAttr1.setDefault(0.5);
     freqAttr1.setKeyable(true);
     freqAttr1.setSoftMin(0.0);
     freqAttr1.setSoftMax(100);
@@ -188,12 +188,12 @@ MStatus proWater::initialize()
     //amplitude2 parameter
     MFnNumericAttribute ampAttr2;
     amplitude2 = ampAttr2.create("secondOctaveAmplitude", "amp2", MFnNumericData::kDouble);
-    ampAttr2.setDefault(1.2);
+    ampAttr2.setDefault(1.3);
     ampAttr2.setKeyable(true);
     ampAttr2.setSoftMin(0.0);
-    ampAttr2.setSoftMax(10);
+    ampAttr2.setSoftMax(100);
     ampAttr2.setMin(0.0);
-    ampAttr2.setMax(10);
+    ampAttr2.setMax(100);
     addAttribute(amplitude2);
     attributeAffects(proWater::amplitude2, proWater::outputGeom);
     //
@@ -201,7 +201,7 @@ MStatus proWater::initialize()
     //frequency2 parameter
     MFnNumericAttribute freqAttr2;
     frequency2 = freqAttr2.create("secondFrequency", "freq2", MFnNumericData::kDouble);
-    freqAttr2.setDefault(0.9);
+    freqAttr2.setDefault(0.7);
     freqAttr2.setKeyable(true);
     freqAttr2.setSoftMin(0.0);
     freqAttr2.setSoftMax(100);
