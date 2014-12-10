@@ -80,14 +80,10 @@ public:
 	static  MTypeId		id;
     
     static MObject time; //time variable
-    static MObject bigFreq;
     static MObject amplitude1;
     static MObject amplitude2;
     static MObject amplitude3;
     static MObject frequency1;
-    static MObject frequency2;
-    static MObject frequency3;
-    static MObject dir;
 
 private:
 };
@@ -99,14 +95,10 @@ MTypeId     proWater::id( 0x8000c );
 MObject		proWater::offsetMatrix;
 
 MObject proWater::time;
-MObject proWater::bigFreq;
 MObject proWater::amplitude1;
 MObject proWater::amplitude2;
 MObject proWater::amplitude3;
 MObject proWater::frequency1;
-MObject proWater::frequency2;
-MObject proWater::frequency3;
-MObject proWater::dir;
 
 
 proWater::proWater() {}
@@ -126,43 +118,17 @@ MStatus proWater::initialize()
     nAttr.setDefault(0.0);
     nAttr.setKeyable(true);
     nAttr.setSoftMin(0.0);
-    nAttr.setSoftMax(100);
+    nAttr.setSoftMax(10);
     nAttr.setMin(0.0);
-    nAttr.setMax(100);
+    nAttr.setMax(10);
     addAttribute(time);
     attributeAffects(proWater::time, proWater::outputGeom);
     //
     
-    //direction parameter
-    MFnNumericAttribute dirAttr;
-    dir = dirAttr.create("direction", "dirDeg", MFnNumericData::kDouble);
-    dirAttr.setDefault(45);
-    dirAttr.setKeyable(true);
-    dirAttr.setSoftMin(0.0);
-    dirAttr.setSoftMax(360);
-    dirAttr.setMin(0.0);
-    dirAttr.setMax(360);
-    addAttribute(dir);
-    attributeAffects(proWater::dir, proWater::outputGeom);
-    //
-    
-    //bigAmp1 parameter
-    MFnNumericAttribute bigAttr;
-    bigFreq = bigAttr.create("largeWaveAmplitude", "bigAmp", MFnNumericData::kDouble);
-    bigAttr.setDefault(3);
-    bigAttr.setKeyable(true);
-    bigAttr.setSoftMin(0.0);
-    bigAttr.setSoftMax(10);
-    bigAttr.setMin(0.0);
-    bigAttr.setMax(10);
-    addAttribute(bigFreq);
-    attributeAffects(proWater::bigFreq, proWater::outputGeom);
-    //
-    
     //amplitude1 parameter
     MFnNumericAttribute ampAttr1;
-    amplitude1 = ampAttr1.create("firstOctaveAmplitude", "amp1", MFnNumericData::kDouble);
-    ampAttr1.setDefault(0.6);
+    amplitude1 = ampAttr1.create("firstOctave", "amp1", MFnNumericData::kDouble);
+    ampAttr1.setDefault(0.0);
     ampAttr1.setKeyable(true);
     ampAttr1.setSoftMin(0.0);
     ampAttr1.setSoftMax(10);
@@ -175,7 +141,7 @@ MStatus proWater::initialize()
     //frequency1 parameter
     MFnNumericAttribute freqAttr1;
     frequency1 = freqAttr1.create("firstFrequency", "freq1", MFnNumericData::kDouble);
-    freqAttr1.setDefault(1.0);
+    freqAttr1.setDefault(0.0);
     freqAttr1.setKeyable(true);
     freqAttr1.setSoftMin(0.0);
     freqAttr1.setSoftMax(100);
@@ -184,34 +150,6 @@ MStatus proWater::initialize()
     addAttribute(frequency1);
     attributeAffects(proWater::frequency1, proWater::outputGeom);
     //
-    
-    //amplitude2 parameter
-    MFnNumericAttribute ampAttr2;
-    amplitude2 = ampAttr2.create("secondOctaveAmplitude", "amp2", MFnNumericData::kDouble);
-    ampAttr2.setDefault(1.2);
-    ampAttr2.setKeyable(true);
-    ampAttr2.setSoftMin(0.0);
-    ampAttr2.setSoftMax(10);
-    ampAttr2.setMin(0.0);
-    ampAttr2.setMax(10);
-    addAttribute(amplitude2);
-    attributeAffects(proWater::amplitude2, proWater::outputGeom);
-    //
-    
-    //frequency2 parameter
-    MFnNumericAttribute freqAttr2;
-    frequency2 = freqAttr2.create("secondFrequency", "freq2", MFnNumericData::kDouble);
-    freqAttr2.setDefault(0.9);
-    freqAttr2.setKeyable(true);
-    freqAttr2.setSoftMin(0.0);
-    freqAttr2.setSoftMax(100);
-    freqAttr2.setMin(0.0);
-    freqAttr2.setMax(100);
-    addAttribute(frequency2);
-    attributeAffects(proWater::frequency2, proWater::outputGeom);
-    //
-    
-    
     
 	MFnMatrixAttribute  mAttr;
 	offsetMatrix=mAttr.create( "locateMatrix", "lm");
@@ -261,14 +199,6 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
         if(MS::kSuccess != returnStatus) return returnStatus;
         double t = timeData.asDouble();
         
-        MDataHandle dirData = dataBlock.inputValue(dir, &returnStatus);
-        if(MS::kSuccess != returnStatus) return returnStatus;
-        double dirDeg = dirData.asDouble();
-        
-        MDataHandle bigData = dataBlock.inputValue(bigFreq, &returnStatus);
-        if(MS::kSuccess != returnStatus) return returnStatus;
-        double bigFreqAmp = bigData.asDouble();
-        
         MDataHandle ampData = dataBlock.inputValue(amplitude1, &returnStatus);
         if(MS::kSuccess != returnStatus) return returnStatus;
         double amp1 = ampData.asDouble();
@@ -276,14 +206,6 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
         MDataHandle freqData = dataBlock.inputValue(frequency1, &returnStatus);
         if(MS::kSuccess != returnStatus) return returnStatus;
         double freq1 = freqData.asDouble();
-        
-        MDataHandle ampData2 = dataBlock.inputValue(amplitude2, &returnStatus);
-        if(MS::kSuccess != returnStatus) return returnStatus;
-        double amp2 = ampData2.asDouble();
-        
-        MDataHandle freqData2 = dataBlock.inputValue(frequency2, &returnStatus);
-        if(MS::kSuccess != returnStatus) return returnStatus;
-        double freq2 = freqData2.asDouble();
         
         
         // Get the MFnMesh
@@ -298,56 +220,34 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
         for ( ; !iter.isDone(); iter.next()) {
             MPoint pt = iter.position();
             
-            //float2 uvPoint;
+            float2 uvPoint;
             //float u,v;
             
             //uvPoint[0] = u;
             //uvPoint[1] = v;
             
-            //meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
+            meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
             
-            float u = pt.x;//uvPoint[0]*100;
-            float v = pt.z;//uvPoint[1]*100;
-            
-            float degDir = dirDeg;
-            
-            float dir = degDir* M_PI/180;
-            
-            float dirX = cos(dir);
-            float dirY = sin(dir);
+            float u = uvPoint[0]*100;
+            float v = uvPoint[1]*100;
             
             
-            float bigFreq = 0.01;
+            float frequency1 = freq1/10;//0.06;
+            float amplitude1 = amp1;//1.0;
             
-            float bigWaves = bigFreqAmp*scaled_raw_noise_3d(0, 2, (u+t*dirX)*bigFreq*dirX, (v+t*dirY)*bigFreq*dirY*2, t*0.05);
+            float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)(u)*frequency1/1.5, (float)(v+t)*frequency1, 10))-amplitude1);
             
+            float frequency2 = 0.2;
+            float amplitude2 = 0.6;
             
-            float frequency1 = freq1/10;//0.2;
-            float amplitude1 = amp1;//1.3;
+            float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)u*frequency2/5, (float)v*frequency2/2, 10))-amplitude2);
             
-            float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)(u + t*dirX)*frequency1*0.3, (float)(v + t*dirY)*frequency1*0.7, 0.05*t))-amplitude1);
+            float frequency3 = 0.3;
+            float amplitude3 = 0.2;
             
-            float frequency2 = freq2/10;
-            float amplitude2 = amp2;
-        
-            float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)(u + t*dirX)*frequency2*0.4, (float)(v + t*dirY)*frequency2*0.6, 0.005*t))-amplitude2);
+            float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)u*frequency3, (float)v*frequency3, 10))-amplitude3);
             
-            float frequency3 = freq1/10*2;
-            float amplitude3 = amp1/1.5;
-            
-            float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)(u + t*0.5*dirX)*frequency3*0.6, (float)(v + t*0.5*dirY)*frequency3*0.4, 30))-amplitude3);
-            
-            float frequency4 = freq2/10*2;
-            float amplitude4 = amp2/1.5;
-            
-            float fourthOctave = - (std::abs(scaled_raw_noise_3d(-amplitude4, amplitude4, (float)(u + t*0.5*dirX)*frequency4*0.4, (float)(v + t*0.5*dirY)*frequency4*0.6, 50))-amplitude4);
-            
-            float frequency5 = freq2/10;
-            float amplitude5 = amp2/1.5;
-            
-            float fifthOctave = - (std::abs(scaled_raw_noise_3d(-amplitude5, amplitude5, (float)(u + t*0.5*dirX)*frequency5*0.4, (float)(v + t*0.5*dirY)*frequency5*0.6, 0.001*t))-amplitude5);
-            
-            float disp = bigWaves + bigWaves*firstOctave + secondOctave + thirdOctave*thirdOctave + fourthOctave*fourthOctave + fifthOctave*fifthOctave*fifthOctave;// + secondOctave + thirdOctave;
+            float disp = firstOctave + secondOctave + thirdOctave;
             
             pt = pt + iter.normal()*disp;
             
