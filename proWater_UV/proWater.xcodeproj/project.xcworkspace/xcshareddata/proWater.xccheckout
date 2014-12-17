@@ -14,7 +14,7 @@
 		<string>https://github.com/albintornqvist/TNCG13-ProceduralWater.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>UV-mapp/proWater.xcodeproj</string>
+	<string>proWater_UV/proWater.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>DE9C1C0D0189DDB0DC4A89DF7C695755F79B674E</key>

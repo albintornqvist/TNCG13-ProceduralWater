@@ -306,8 +306,8 @@ MStatus proWaterUV::compute(const MPlug& plug, MDataBlock& dataBlock)
             
             meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
             
-            u = uvPoint[0]*100;
-            v = uvPoint[1]*100;
+            u = uvPoint[0]*700;
+            v = uvPoint[1]*700;
             
             float degDir = dirDeg;
             
