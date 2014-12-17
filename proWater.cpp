@@ -126,9 +126,9 @@ MStatus proWater::initialize()
     nAttr.setDefault(0.0);
     nAttr.setKeyable(true);
     nAttr.setSoftMin(0.0);
-    nAttr.setSoftMax(100);
+    nAttr.setSoftMax(1000);
     nAttr.setMin(0.0);
-    nAttr.setMax(100);
+    nAttr.setMax(1000);
     addAttribute(time);
     attributeAffects(proWater::time, proWater::outputGeom);
     //
@@ -319,35 +319,35 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
             
             float bigFreq = 0.01;
             
-            float bigWaves = bigFreqAmp*scaled_raw_noise_3d(0, 2, (u+t*dirX)*bigFreq*dirX, (v+t*dirY)*bigFreq*dirY*2, t*0.05);
+            float bigWaves = scaled_raw_noise_3d(0, 1, (u + 3*t*dirX)*bigFreq*dirX, (v + 3*t*dirY)*bigFreq*dirY*2, t*0.01);
             
             
             float frequency1 = freq1/10;//0.2;
             float amplitude1 = amp1;//1.3;
             
-            float firstOctave = - (std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)(u + t*dirX)*frequency1*0.3, (float)(v + t*dirY)*frequency1*0.7, 0.05*t))-amplitude1);
+            float firstOctave = -(std::abs(scaled_raw_noise_3d(-amplitude1, amplitude1, (float)(u + 0.7*t*dirX)*frequency1*0.4, (float)(v + 0.7*t*dirY)*frequency1*0.6, 0.05*t))-amplitude1);
             
             float frequency2 = freq2/10;
             float amplitude2 = amp2;
         
-            float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)(u + t*dirX)*frequency2*0.4, (float)(v + t*dirY)*frequency2*0.6, 0.005*t))-amplitude2);
+            float secondOctave = - (std::abs(scaled_raw_noise_3d(-amplitude2, amplitude2, (float)(u + 0.7*t*dirX)*frequency2*0.35, (float)(v + 0.7*t*dirY)*frequency2*0.65, 0.005*t))-amplitude2);
             
-            float frequency3 = freq1/10*2;
+            float frequency3 = freq1/10;
             float amplitude3 = amp1/1.5;
             
-            float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)(u + t*0.5*dirX)*frequency3*0.6, (float)(v + t*0.5*dirY)*frequency3*0.4, 30))-amplitude3);
+            float thirdOctave = - (std::abs(scaled_raw_noise_3d(-amplitude3, amplitude3, (float)(u + t*0.5*dirX)*frequency3*0.4, (float)(v + t*0.5*dirY)*frequency3*0.6, 30))-amplitude3);
             
-            float frequency4 = freq2/10*2;
+            float frequency4 = freq2/10;
             float amplitude4 = amp2/1.5;
             
-            float fourthOctave = - (std::abs(scaled_raw_noise_3d(-amplitude4, amplitude4, (float)(u + t*0.5*dirX)*frequency4*0.4, (float)(v + t*0.5*dirY)*frequency4*0.6, 50))-amplitude4);
+            float fourthOctave = scaled_raw_noise_3d(-amplitude4, amplitude4, (float)(u + t*0.5*dirX)*frequency4*0.4, (float)(v + t*0.5*dirY)*frequency4*0.6, 50);
             
-            float frequency5 = freq2/10;
-            float amplitude5 = amp2/1.5;
+            float frequency5 = freq2;
+            float amplitude5 = amp2/2;
             
-            float fifthOctave = - (std::abs(scaled_raw_noise_3d(-amplitude5, amplitude5, (float)(u + t*0.5*dirX)*frequency5*0.4, (float)(v + t*0.5*dirY)*frequency5*0.6, 0.001*t))-amplitude5);
+            float fifthOctave = scaled_raw_noise_3d(-amplitude5, amplitude5, (float)(u + t*0.5*dirX)*frequency5*0.15, (float)(v + t*0.5*dirY)*frequency5*0.85, 0.001*t);
             
-            float disp = bigWaves + bigWaves*firstOctave + secondOctave + thirdOctave*thirdOctave + fourthOctave*fourthOctave + fifthOctave*fifthOctave*fifthOctave;// + secondOctave + thirdOctave;
+            float disp = bigFreqAmp*bigWaves + 7*(bigWaves)*firstOctave + secondOctave + thirdOctave*thirdOctave + fourthOctave + std::abs(bigWaves-1)*fifthOctave;
             
             pt = pt + iter.normal()*disp;
             
