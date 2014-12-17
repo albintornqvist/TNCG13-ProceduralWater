@@ -10,7 +10,7 @@
 //+
 
 //
-//  File: proWater.cc
+//  File: proWaterUV.cc
 //
 //  Description:
 // 		Example implementation of a deformer. This node
@@ -52,11 +52,11 @@
 #include <complex>
 
 
-class proWater : public MPxDeformerNode
+class proWaterUV : public MPxDeformerNode
 {
 public:
-						proWater();
-	virtual				~proWater();
+						proWaterUV();
+	virtual				~proWaterUV();
 
 	static  void*		creator();
 	static  MStatus		initialize();
@@ -92,32 +92,32 @@ public:
 private:
 };
 
-MTypeId     proWater::id( 0x8000c );
+MTypeId     proWaterUV::id( 0x8000c );
 
 // local attributes
 //
-MObject		proWater::offsetMatrix;
+MObject		proWaterUV::offsetMatrix;
 
-MObject proWater::time;
-MObject proWater::bigFreq;
-MObject proWater::amplitude1;
-MObject proWater::amplitude2;
-MObject proWater::amplitude3;
-MObject proWater::frequency1;
-MObject proWater::frequency2;
-MObject proWater::frequency3;
-MObject proWater::dir;
+MObject proWaterUV::time;
+MObject proWaterUV::bigFreq;
+MObject proWaterUV::amplitude1;
+MObject proWaterUV::amplitude2;
+MObject proWaterUV::amplitude3;
+MObject proWaterUV::frequency1;
+MObject proWaterUV::frequency2;
+MObject proWaterUV::frequency3;
+MObject proWaterUV::dir;
 
 
-proWater::proWater() {}
-proWater::~proWater() {}
+proWaterUV::proWaterUV() {}
+proWaterUV::~proWaterUV() {}
 
-void* proWater::creator()
+void* proWaterUV::creator()
 {
-	return new proWater();
+	return new proWaterUV();
 }
 
-MStatus proWater::initialize()
+MStatus proWaterUV::initialize()
 {
 	// local attribute initialization
     //time parameter
@@ -130,7 +130,7 @@ MStatus proWater::initialize()
     nAttr.setMin(0.0);
     nAttr.setMax(1000);
     addAttribute(time);
-    attributeAffects(proWater::time, proWater::outputGeom);
+    attributeAffects(proWaterUV::time, proWaterUV::outputGeom);
     //
     
     //direction parameter
@@ -143,7 +143,7 @@ MStatus proWater::initialize()
     dirAttr.setMin(0.0);
     dirAttr.setMax(360);
     addAttribute(dir);
-    attributeAffects(proWater::dir, proWater::outputGeom);
+    attributeAffects(proWaterUV::dir, proWaterUV::outputGeom);
     //
     
     //bigAmp1 parameter
@@ -156,7 +156,7 @@ MStatus proWater::initialize()
     bigAttr.setMin(0.0);
     bigAttr.setMax(100);
     addAttribute(bigFreq);
-    attributeAffects(proWater::bigFreq, proWater::outputGeom);
+    attributeAffects(proWaterUV::bigFreq, proWaterUV::outputGeom);
     //
     
     //amplitude1 parameter
@@ -169,7 +169,7 @@ MStatus proWater::initialize()
     ampAttr1.setMin(0.0);
     ampAttr1.setMax(100);
     addAttribute(amplitude1);
-    attributeAffects(proWater::amplitude1, proWater::outputGeom);
+    attributeAffects(proWaterUV::amplitude1, proWaterUV::outputGeom);
     //
     
     //frequency1 parameter
@@ -182,7 +182,7 @@ MStatus proWater::initialize()
     freqAttr1.setMin(0.0);
     freqAttr1.setMax(100);
     addAttribute(frequency1);
-    attributeAffects(proWater::frequency1, proWater::outputGeom);
+    attributeAffects(proWaterUV::frequency1, proWaterUV::outputGeom);
     //
     
     //amplitude2 parameter
@@ -195,7 +195,7 @@ MStatus proWater::initialize()
     ampAttr2.setMin(0.0);
     ampAttr2.setMax(100);
     addAttribute(amplitude2);
-    attributeAffects(proWater::amplitude2, proWater::outputGeom);
+    attributeAffects(proWaterUV::amplitude2, proWaterUV::outputGeom);
     //
     
     //frequency2 parameter
@@ -208,7 +208,7 @@ MStatus proWater::initialize()
     freqAttr2.setMin(0.0);
     freqAttr2.setMax(100);
     addAttribute(frequency2);
-    attributeAffects(proWater::frequency2, proWater::outputGeom);
+    attributeAffects(proWaterUV::frequency2, proWaterUV::outputGeom);
     //
     
     
@@ -221,13 +221,13 @@ MStatus proWater::initialize()
 	//  deformation attributes
 	addAttribute( offsetMatrix);
 
-	attributeAffects( proWater::offsetMatrix, proWater::outputGeom );
+	attributeAffects( proWaterUV::offsetMatrix, proWaterUV::outputGeom );
 
 	return MStatus::kSuccess;
 }
 
 
-MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
+MStatus proWaterUV::compute(const MPlug& plug, MDataBlock& dataBlock)
 {
     MStatus status = MStatus::kUnknownParameter;
     if (plug.attribute() == outputGeom) {
@@ -298,16 +298,16 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
         for ( ; !iter.isDone(); iter.next()) {
             MPoint pt = iter.position();
             
-            //float2 uvPoint;
-            //float u,v;
+            float2 uvPoint;
+            float u,v;
             
-            //uvPoint[0] = u;
-            //uvPoint[1] = v;
+            uvPoint[0] = u;
+            uvPoint[1] = v;
             
-            //meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
+            meshFn->getUVAtPoint(pt, uvPoint, MSpace::kObject);
             
-            float u = pt.x; //uvPoint[0]*100;
-            float v = pt.z; //uvPoint[1]*100;
+            u = uvPoint[0]*100;
+            v = uvPoint[1]*100;
             
             float degDir = dirDeg;
             
@@ -365,7 +365,7 @@ MStatus proWater::compute(const MPlug& plug, MDataBlock& dataBlock)
 
 /* override */
 MObject&
-proWater::accessoryAttribute() const
+proWaterUV::accessoryAttribute() const
 //
 //	Description:
 //	  This method returns a the attribute to which an accessory	
@@ -375,12 +375,12 @@ proWater::accessoryAttribute() const
 //    This method is optional.
 //
 {
-	return proWater::offsetMatrix;
+	return proWaterUV::offsetMatrix;
 }
 
 /* override */
 MStatus
-proWater::accessoryNodeSetup(MDagModifier& cmd)
+proWaterUV::accessoryNodeSetup(MDagModifier& cmd)
 //
 //	Description:
 //		This method is called when the deformer is created by the
@@ -410,7 +410,7 @@ proWater::accessoryNodeSetup(MDagModifier& cmd)
 		attrName.set("matrix");
 		MObject attrMat = fnLoc.attribute(attrName);
 
-		result = cmd.connect(objLoc,attrMat,this->thisMObject(),proWater::offsetMatrix);
+		result = cmd.connect(objLoc,attrMat,this->thisMObject(),proWaterUV::offsetMatrix);
 	}
 	return result;
 }
@@ -423,8 +423,8 @@ MStatus initializePlugin( MObject obj )
 {
 	MStatus result;
 	MFnPlugin plugin( obj, PLUGIN_COMPANY, "3.0", "Any");
-	result = plugin.registerNode( "proWater", proWater::id, proWater::creator,
-								  proWater::initialize, MPxNode::kDeformerNode );
+	result = plugin.registerNode( "proWaterUV", proWaterUV::id, proWaterUV::creator,
+								  proWaterUV::initialize, MPxNode::kDeformerNode );
     
 	return result;
 }
@@ -433,6 +433,6 @@ MStatus uninitializePlugin( MObject obj)
 {
 	MStatus result;
 	MFnPlugin plugin( obj );
-	result = plugin.deregisterNode( proWater::id );
+	result = plugin.deregisterNode( proWaterUV::id );
 	return result;
 }
